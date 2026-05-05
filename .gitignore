@@ -38,3 +38,7 @@ appsettings.*.json
 .vscode/
 *.swp
 *.swo
+
+# Blazor
+wwwroot/service-worker.js
+wwwroot/service-worker-assets.json
