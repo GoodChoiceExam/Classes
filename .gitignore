@@ -42,3 +42,5 @@ appsettings.*.json
 # Blazor
 wwwroot/service-worker.js
 wwwroot/service-worker-assets.json
+
+## tjek
