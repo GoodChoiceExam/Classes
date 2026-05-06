@@ -1,22 +1,33 @@
 ﻿# FitLife Classes
 
-Classes is a small ASP.NET Core Web API microservice for fitness class sessions.
+Classes is an ASP.NET Core Web API microservice for fitness classes and class bookings.
 
-The service handles CRUD operations for fitness classes and stores data in MongoDB.
+The service matches the Classes bounded context from the FitLife DDD model. `TrainingClass` is the aggregate root, and `Booking` is an entity inside that aggregate because bookings affect class capacity and available spots.
 
 ## What It Does
 
-A class session contains:
+A training class contains:
 
 - id
 - title
 - description
-- trainer name
-- location
+- category
+- difficulty level
 - start time
 - end time
+- location
 - capacity
-- booked count
+- available spots
+- trainer id
+- bookings
+
+A booking contains:
+
+- id
+- member id
+- training class id
+- booked at
+- status
 
 ## Run Locally
 
@@ -59,9 +70,12 @@ GET    /api/classes/{id}
 POST   /api/classes
 PUT    /api/classes/{id}
 DELETE /api/classes/{id}
+POST   /api/classes/{id}/bookings
+PUT    /api/classes/{id}/bookings/{bookingId}/cancel
+PUT    /api/classes/{id}/bookings/{bookingId}/amend
 ```
 
-## Example Request
+## Example Create Training Class
 
 ```http
 POST /api/classes
@@ -70,12 +84,25 @@ Content-Type: application/json
 {
   "title": "Morning HIIT",
   "description": "High intensity interval training for all levels.",
-  "trainerName": "Sara Jensen",
-  "location": "Aarhus Center - Studio 1",
+  "category": "HIIT",
+  "difficultyLevel": "Beginner",
   "startTime": "2026-05-06T08:00:00Z",
   "endTime": "2026-05-06T08:45:00Z",
+  "location": "Vesterbro",
   "capacity": 20,
-  "bookedCount": 0
+  "availableSpots": 20,
+  "trainerId": "11111111-1111-1111-1111-111111111111"
+}
+```
+
+## Example Book Class
+
+```http
+POST /api/classes/{id}/bookings
+Content-Type: application/json
+
+{
+  "memberId": "22222222-2222-2222-2222-222222222222"
 }
 ```
 
@@ -106,4 +133,3 @@ MongoDB__ConnectionString=mongodb://mongodb:27017
 Nginx can later proxy `/api/classes` to the Classes container.
 
 No RabbitMQ, authentication, or frontend integration is included yet.
-
