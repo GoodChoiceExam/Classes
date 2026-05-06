@@ -11,7 +11,7 @@ try
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
-    builder.Services.AddSingleton<IClassSessionService, ClassSessionService>();
+    builder.Services.AddSingleton<ITrainingClassService, TrainingClassService>();
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();

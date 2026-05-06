@@ -8,53 +8,90 @@ namespace FitLife.Classes.Api.Controllers;
 [Route("api/classes")]
 public class ClassesController : ControllerBase
 {
-    private readonly IClassSessionService _classSessionService;
+    private readonly ITrainingClassService _trainingClassService;
 
-    public ClassesController(IClassSessionService classSessionService)
+    public ClassesController(ITrainingClassService trainingClassService)
     {
-        _classSessionService = classSessionService;
+        _trainingClassService = trainingClassService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _classSessionService.GetAllAsync());
+        return Ok(await _trainingClassService.GetAllAsync());
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
     {
-        var classSession = await _classSessionService.GetByIdAsync(id);
-        if (classSession is null)
+        var trainingClass = await _trainingClassService.GetByIdAsync(id);
+        if (trainingClass is null)
             return NotFound();
 
-        return Ok(classSession);
+        return Ok(trainingClass);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ClassSessionRequest request)
+    public async Task<IActionResult> Create(TrainingClassRequest request)
     {
-        var classSession = await _classSessionService.CreateAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = classSession.Id }, classSession);
+        var trainingClass = await _trainingClassService.CreateAsync(request);
+        return CreatedAtAction(nameof(GetById), new { id = trainingClass.Id }, trainingClass);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, ClassSessionRequest request)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, TrainingClassRequest request)
     {
-        var classSession = await _classSessionService.UpdateAsync(id, request);
-        if (classSession is null)
+        var trainingClass = await _trainingClassService.UpdateAsync(id, request);
+        if (trainingClass is null)
             return NotFound();
 
-        return Ok(classSession);
+        return Ok(trainingClass);
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
     {
-        var deleted = await _classSessionService.DeleteAsync(id);
+        var deleted = await _trainingClassService.DeleteAsync(id);
         if (!deleted)
             return NotFound();
 
         return NoContent();
+    }
+
+    [HttpPost("{id:guid}/bookings")]
+    public async Task<IActionResult> Book(Guid id, BookingRequest request)
+    {
+        try
+        {
+            var booking = await _trainingClassService.BookAsync(id, request);
+            if (booking is null)
+                return NotFound();
+
+            return Created($"/api/classes/{id}/bookings/{booking.Id}", booking);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPut("{id:guid}/bookings/{bookingId:guid}/cancel")]
+    public async Task<IActionResult> CancelBooking(Guid id, Guid bookingId)
+    {
+        var booking = await _trainingClassService.CancelBookingAsync(id, bookingId);
+        if (booking is null)
+            return NotFound();
+
+        return Ok(booking);
+    }
+
+    [HttpPut("{id:guid}/bookings/{bookingId:guid}/amend")]
+    public async Task<IActionResult> AmendBooking(Guid id, Guid bookingId)
+    {
+        var booking = await _trainingClassService.AmendBookingAsync(id, bookingId);
+        if (booking is null)
+            return NotFound();
+
+        return Ok(booking);
     }
 }
