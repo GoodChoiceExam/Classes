@@ -11,6 +11,14 @@ try
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("Frontend", policy =>
+            policy.WithOrigins("http://localhost:5271")
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+    });
+
     builder.Services.AddSingleton<ITrainingClassService, TrainingClassService>();
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
@@ -20,6 +28,8 @@ try
 
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.UseCors("Frontend");
 
     app.MapGet("/healthz", () => Results.Ok(new { status = "healthy" }));
     app.MapControllers();
