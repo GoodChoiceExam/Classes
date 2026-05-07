@@ -4,6 +4,8 @@ Classes is an ASP.NET Core Web API microservice for fitness classes and class bo
 
 The service matches the Classes bounded context from the FitLife DDD model. `TrainingClass` is the aggregate root, and `Booking` is an entity inside that aggregate because bookings affect class capacity and available spots.
 
+Classes does not issue JWT tokens. Identity owns login and token issuing. Classes only validates JWT Bearer tokens from Identity through the JWKS endpoint.
+
 ## What It Does
 
 A training class contains:
@@ -31,10 +33,11 @@ A booking contains:
 
 ## Run Locally
 
-Start MongoDB first. For local development, the default configuration expects MongoDB here:
+Start MongoDB and Identity first. For local development, the default configuration expects:
 
 ```text
 mongodb://localhost:27017
+http://localhost:5244/.well-known/jwks.json
 ```
 
 From the repository root:
@@ -62,6 +65,12 @@ Health check:
 GET http://localhost:5245/healthz
 ```
 
+Protected endpoints require a JWT token from Identity:
+
+```text
+Authorization: Bearer <jwtToken>
+```
+
 ## Endpoints
 
 ```text
@@ -75,10 +84,13 @@ PUT    /api/classes/{id}/bookings/{bookingId}/cancel
 PUT    /api/classes/{id}/bookings/{bookingId}/amend
 ```
 
+`/healthz` and `/swagger` are public. `/api/classes` endpoints require JWT authentication.
+
 ## Example Create Training Class
 
 ```http
 POST /api/classes
+Authorization: Bearer <jwtToken>
 Content-Type: application/json
 
 {
@@ -99,6 +111,7 @@ Content-Type: application/json
 
 ```http
 POST /api/classes/{id}/bookings
+Authorization: Bearer <jwtToken>
 Content-Type: application/json
 
 {
@@ -120,6 +133,37 @@ Run it:
 docker run -p 8080:8080 fitlife-classes
 ```
 
+Run Classes together with Identity, MongoDB, and Loki from this repository:
+
+```powershell
+docker compose up --build
+```
+
+Local compose URLs:
+
+```text
+Classes:  http://localhost:5245
+Identity: http://localhost:5244
+Loki:     http://localhost:3100
+MongoDB:  localhost:27017
+```
+
+## Postman
+
+A Postman collection is available here:
+
+```text
+postman/FitLife.Classes.postman_collection.json
+```
+
+Use these collection variables:
+
+```text
+baseUrl=http://localhost:5245
+identityBaseUrl=http://localhost:5244
+jwtToken=<token from Identity>
+```
+
 ## Later Docker Compose And Nginx Integration
 
 This service can later be added to the Infrastructure `docker-compose.yml` as a `classes` service.
@@ -132,4 +176,4 @@ MongoDB__ConnectionString=mongodb://mongodb:27017
 
 Nginx can later proxy `/api/classes` to the Classes container.
 
-No RabbitMQ, authentication, or frontend integration is included yet.
+No RabbitMQ or frontend implementation is included yet.
