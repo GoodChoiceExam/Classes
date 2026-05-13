@@ -13,4 +13,5 @@ public interface ITrainingClassService
     Task<Booking?> BookAsync(Guid trainingClassId, BookingRequest request);
     Task<Booking?> CancelBookingAsync(Guid trainingClassId, Guid bookingId);
     Task<Booking?> AmendBookingAsync(Guid trainingClassId, Guid bookingId);
+    Task<List<Booking>> GetBookingsByMemberAsync(Guid memberId);
 }
