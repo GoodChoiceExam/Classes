@@ -115,4 +115,13 @@ public class TrainingClassService : ITrainingClassService
         AvailableSpots = request.AvailableSpots,
         TrainerId = request.TrainerId
     };
+    
+    public async Task<List<Booking>> GetBookingsByMemberAsync(Guid memberId)
+    {
+        var classes = await _classes.Find(_ => true).ToListAsync();
+        return classes
+            .SelectMany(c => c.Bookings)
+            .Where(b => b.MemberId == memberId && b.Status == BookingStatus.Booked)
+            .ToList();
+    }
 }

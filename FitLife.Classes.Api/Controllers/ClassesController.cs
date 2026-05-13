@@ -129,4 +129,11 @@ public class ClassesController : ControllerBase
         _logger.LogInformation("Amended booking {BookingId} on training class {TrainingClassId}", bookingId, id);
         return Ok(booking);
     }
+    
+    [HttpGet("bookings/mine")]
+    public async Task<IActionResult> GetMyBookings([FromQuery] Guid memberId)
+    {
+        var bookings = await _trainingClassService.GetBookingsByMemberAsync(memberId);
+        return Ok(bookings);
+    }
 }
